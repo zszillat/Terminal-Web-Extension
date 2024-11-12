@@ -1,27 +1,37 @@
-// background.js
+// Example WebSocket connection in background.js
 
-// The WebSocket URL you want to connect to
-const socketURL = "ws://localhost:8081";
+const socket = new WebSocket('ws://localhost:8081');
 
-// Create the WebSocket connection
-const socket = new WebSocket(socketURL);
+// Open connection
+socket.onopen = () => {
+  console.log('Connected to WebSocket server!');
+};
 
-// When the WebSocket opens, log it to the console
-socket.addEventListener('open', () => {
-  console.log(`Connected to WebSocket server at ${socketURL}`);
-});
+// Handle incoming messages
+socket.onmessage = (event) => {
+  const message = event.data;
 
-// When a message is received from the WebSocket server, log it to the console
-socket.addEventListener('message', (event) => {
-  console.log('Received message:', event.data);
-});
+  if (message instanceof Blob) {
+    // If the message is a Blob, read it as text
+    const reader = new FileReader();
 
-// Handle any WebSocket errors
-socket.addEventListener('error', (error) => {
-  console.error('WebSocket error:', error);
-});
+    reader.onloadend = () => {
+      console.log('Received message: ', reader.result); // The message is now a string
+    };
 
-// Close the WebSocket gracefully on extension shutdown
-socket.addEventListener('close', () => {
+    reader.readAsText(message); // Read the Blob as a text string
+  } else {
+    // If the message is a string, log it directly
+    console.log('Received message: ', message);
+  }
+};
+
+// Handle errors
+socket.onerror = (error) => {
+  console.error('WebSocket Error:', error);
+};
+
+// Handle connection close
+socket.onclose = () => {
   console.log('WebSocket connection closed');
-});
+};
