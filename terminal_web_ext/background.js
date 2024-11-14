@@ -4,7 +4,6 @@ const socket = new WebSocket('ws://localhost:8081');
 
 // Open connection
 socket.onopen = () => {
-  console.log('Connected to WebSocket server!');
 };
 
 // Handle incoming messages
@@ -16,22 +15,35 @@ socket.onmessage = (event) => {
     const reader = new FileReader();
 
     reader.onloadend = () => {
-      console.log('Received message: ', reader.result); // The message is now a string
+      terminalLogic(reader.result); // The message is now a string
     };
 
     reader.readAsText(message); // Read the Blob as a text string
   } else {
     // If the message is a string, log it directly
-    console.log('Received message: ', message);
+    terminalLogic(message);
   }
 };
 
 // Handle errors
 socket.onerror = (error) => {
-  console.error('WebSocket Error:', error);
+  terminalLogic('WebSocket Error: ' + error);
 };
 
 // Handle connection close
 socket.onclose = () => {
-  console.log('WebSocket connection closed');
+  terminalLogic('WebSocket connection closed');
 };
+
+function terminalLogic(term) {
+  const termStr = String(term).trim();  // Ensure term is a string and remove extra whitespace
+
+  switch (termStr) {
+    case 'youtube':
+      chrome.tabs.create({ url: "https://www.youtube.com" });
+      break;
+    default:
+      console.log('Default case: ', termStr);
+      break;
+  }
+}
